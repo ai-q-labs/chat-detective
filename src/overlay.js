@@ -11,12 +11,14 @@ let sharpTimer = null;
 if (new URLSearchParams(location.search).get('backdrop') === '1') document.body.classList.add('with-backdrop');
 
 function fitStage() {
-  stageScale = Math.min(innerWidth / 1920, innerHeight / 1080);
+  const viewportWidth = innerWidth || document.documentElement.clientWidth || 1920;
+  const viewportHeight = innerHeight || document.documentElement.clientHeight || 1080;
+  stageScale = Math.max(0.0001, Math.min(viewportWidth / 1920, viewportHeight / 1080));
   const width = 1920 * stageScale;
   const height = 1080 * stageScale;
   $('stage-root').style.transform = `scale(${stageScale})`;
-  $('stage-root').style.left = `${(innerWidth - width) / 2}px`;
-  $('stage-root').style.top = `${(innerHeight - height) / 2}px`;
+  $('stage-root').style.left = `${(viewportWidth - width) / 2}px`;
+  $('stage-root').style.top = `${(viewportHeight - height) / 2}px`;
 }
 
 function renderSuspects(state) {
@@ -142,7 +144,7 @@ function render(state) {
     ? (state.locations || []).filter(location => !state.searched.includes(location.id)).map(location => [location.id, location.name])
     : key === 'ask' || key === 'accusation' ? Object.entries(state.suspects || {}).map(([id, suspect]) => [id, suspect.name]) : [];
   $('options').style.setProperty('--option-count', Math.min(5, Math.max(1, options.length)));
-  $('ballotTitle').textContent = key === 'search' ? 'SEARCH THE SCENE' : key === 'ask' ? 'CHOOSE A SUSPECT TO QUESTION' : key === 'accusation' ? 'WHO TOOK THE TROPHY?' : 'CASE IN PROGRESS';
+  $('ballotTitle').textContent = state.revealed ? 'CASE CLOSED' : key === 'search' ? 'SEARCH THE SCENE' : key === 'ask' ? 'CHOOSE A SUSPECT TO QUESTION' : key === 'accusation' ? 'WHO TOOK THE TROPHY?' : 'CASE IN PROGRESS';
   $('options').innerHTML = options.map(([id, label]) => {
     const count = counts[id] || 0;
     const largest = Math.max(1, ...Object.values(counts));
@@ -154,8 +156,8 @@ function render(state) {
     : key === 'accusation' ? `Type !accuse ${options.map(item => item[0]).join(' · ')}`
     : state.phase === 'objection' ? `Spot the lie? Type !contradict ${found.join(' · ')}` : '';
   const seconds = state.remainingSeconds;
-  $('countdown').textContent = seconds === null ? '—' : seconds;
-  $('progress').style.strokeDashoffset = seconds === null ? 226 : 226 * (1 - seconds / Math.max(1, state.timerDuration || 30));
+  $('countdown').textContent = state.revealed ? '✓' : seconds === null ? '—' : seconds;
+  $('progress').style.strokeDashoffset = state.revealed ? 0 : seconds === null ? 226 : 226 * (1 - seconds / Math.max(1, state.timerDuration || 30));
   const testimony = renderTestimony(state);
   const objectionCountdown = $('objectionCountdown');
   if (objectionCountdown) objectionCountdown.textContent = `${seconds ?? '—'}s`;
@@ -186,8 +188,15 @@ function render(state) {
   renderFinal(state);
 }
 
+function refitStage() { fitStage(); if (lastState) render(lastState); }
 fitStage();
-addEventListener('resize', () => { fitStage(); if (lastState) render(lastState); });
+addEventListener('resize', refitStage);
+addEventListener('load', refitStage);
+document.addEventListener('visibilitychange', refitStage);
+if ('ResizeObserver' in window) {
+  const viewportObserver = new ResizeObserver(refitStage);
+  viewportObserver.observe(document.documentElement);
+}
 $('evidence').addEventListener('scroll', () => lastState && renderStrings(lastState.lies));
 const events = new EventSource('/events');
 events.onmessage = event => { lastState = JSON.parse(event.data); render(lastState); };

@@ -35,6 +35,21 @@ test('question ballot opens with the configured timer and advances when it expir
   g.advance(30000); assert.equal(g.state().phase, 'objection');
 });
 
+test('host can pause a ballot timer, keep the vote open, and resume its remaining time', () => {
+  const g = setup(); g.next();
+  g.host('pause-timer');
+  assert.equal(g.state().timerPaused, true);
+  assert.equal(g.state().remainingSeconds, 30);
+  g.advance(60000);
+  assert.equal(g.state().phase, 'search');
+  g.send('viewer', '!search 2');
+  assert.equal(g.state().votes.search[2], 1);
+  g.host('resume-timer');
+  assert.equal(g.state().timerPaused, false);
+  g.advance(30000);
+  assert.equal(g.state().phase, 'question');
+});
+
 test('testimony card exists only during objection, while the caught lie remains on the board', () => {
   const g = setup(); g.next(); g.find(3); g.next(); g.send('voter', '!ask C'); g.next();
   assert.equal(g.state().phase, 'objection'); assert.equal(g.state().testimonyCard.suspect, 'C');

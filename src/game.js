@@ -36,11 +36,11 @@ function createGame(caseData, opts = {}) {
   const voteSeconds = Math.max(1, Number(opts.voteSeconds || 30));
   const now = () => Number(opts.now ? opts.now() : Date.now());
   const suspects = Object.keys(caseData.suspects);
-  let game; let timerDuration = null;
+  let game; let timerDuration = null; let pausedRemainingMs = null;
   const ballots = { search: {}, ask: {}, accusation: {} };
   const calls = new Set();
   function fresh() {
-    return { title: caseData.title, intro: caseData.intro, phase: 'intro', round: 0, deadline: null, searched: [], evidence: [], testimony: null, truthRevealed: false, sharpEyes: [], lies: [], misses: 0, votes: {}, revealed: false, solution: null, ending: null, accusationResult: null, simulated: !!opts.simulated };
+    return { title: caseData.title, intro: caseData.intro, phase: 'intro', round: 0, deadline: null, timerPaused: false, searched: [], evidence: [], testimony: null, truthRevealed: false, sharpEyes: [], lies: [], misses: 0, votes: {}, revealed: false, solution: null, ending: null, accusationResult: null, simulated: !!opts.simulated };
   }
   game = fresh();
   const tally = ballot => Object.values(ballot || {}).reduce((acc, value) => (acc[value] = (acc[value] || 0) + 1, acc), {});
@@ -48,7 +48,7 @@ function createGame(caseData, opts = {}) {
   function snapshot() {
     const s = structuredClone(game);
     s.timerDuration = timerDuration;
-    s.remainingSeconds = game.deadline ? Math.max(0, Math.ceil((game.deadline - now()) / 1000)) : null;
+    s.remainingSeconds = game.timerPaused ? Math.max(0, Math.ceil(pausedRemainingMs / 1000)) : game.deadline ? Math.max(0, Math.ceil((game.deadline - now()) / 1000)) : null;
     s.suspects = Object.fromEntries(Object.entries(caseData.suspects).map(([id, suspect]) => [id, { ...suspect, lie: game.lies.find(lie => lie.suspect === id) || null }]));
     s.locations = caseData.locations.map(l => ({ id: l.id, name: l.name, evidence: game.evidence.find(e => e.id === l.evidence.id) || null }));
     s.testimonyCard = game.phase === 'objection' && game.testimony ? { suspect: game.testimony, ...caseData.testimonies[game.testimony], revealedTruth: game.truthRevealed } : null;
@@ -62,7 +62,7 @@ function createGame(caseData, opts = {}) {
   function output(effects = []) { effects.push({ broadcast: snapshot() }); return effects; }
   const say = text => ({ say: text });
   function clearBallot(key) { ballots[key] = {}; }
-  function phase(name, duration) { game.phase = name; timerDuration = duration || null; game.deadline = duration ? now() + duration * 1000 : null; }
+  function phase(name, duration) { game.phase = name; timerDuration = duration || null; game.deadline = duration ? now() + duration * 1000 : null; game.timerPaused = false; pausedRemainingMs = null; }
   function startSearch(effects) {
     const remaining = caseData.locations.filter(location => !game.searched.includes(location.id));
     if (remaining.length === 1) {
@@ -112,7 +112,9 @@ function createGame(caseData, opts = {}) {
   }
   function hostAction(action) {
     const effects = [];
-    if (action === 'reset') { game = fresh(); clearBallot('search'); clearBallot('ask'); clearBallot('accusation'); calls.clear(); }
+    if (action === 'reset') { game = fresh(); timerDuration = null; pausedRemainingMs = null; clearBallot('search'); clearBallot('ask'); clearBallot('accusation'); calls.clear(); }
+    else if (action === 'pause-timer' && game.deadline && !game.timerPaused) { pausedRemainingMs = Math.max(0, game.deadline - now()); game.deadline = null; game.timerPaused = true; }
+    else if (action === 'resume-timer' && game.timerPaused) { game.deadline = now() + pausedRemainingMs; game.timerPaused = false; pausedRemainingMs = null; }
     else if (action === 'reveal') reveal(effects);
     else if (action === 'next') advance(effects);
     return output(effects);

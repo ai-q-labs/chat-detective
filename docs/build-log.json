@@ -1,0 +1,71 @@
+{
+  "thread": "01a170c1-138c-7b02-8b67-a31df84e4d17",
+  "tool": "OpenAI Codex CLI 0.164.0 (codex exec, then codex exec resume on the same thread)",
+  "passes": [
+    {
+      "n": 1,
+      "asked": "Read SPEC.md and build the whole project: game engine, command parser, Twitch client, server with overlay and control pages, the first case, a scripted demo crowd, tests, README, MIT licence. Zero npm dependencies.",
+      "result": "First playable version. 4 tests passing; /overlay, /control and /events responding in sim mode."
+    },
+    {
+      "n": 2,
+      "asked": "Fix ballots carrying over between rounds; derive commands from the case file; harden Twitch (401 refresh, reconnect, keepalive, 1 message per second); redesign the overlay for a stream; host control page with a fake chat; a demo crowd of 12 viewers; at least 15 tests.",
+      "result": "21 tests passing; the demo reaches the reveal with 83% of voters right."
+    },
+    {
+      "n": 3,
+      "asked": "Give the question vote a timer; split the intro at a sentence; flip evidence cards in place; fit the status row; scale a fixed 1920x1080 stage to any window; add a neutral backdrop for recording.",
+      "result": "24 tests passing."
+    },
+    {
+      "n": 4,
+      "asked": "Hide the testimony card after the objection window; keep caught lies on the board (LIED stamp, red string); skip a one-option search vote; show the objection prompt; fit the case-board text.",
+      "result": "26 tests passing; every demo run now catches two lies."
+    },
+    {
+      "n": 5,
+      "asked": "First live run on Twitch: sending works but a viewer's !search never arrived and the socket kept reconnecting. Log the subscription response and close codes, validate the token at startup, fix the keepalive watchdog and the control page, add npm run check-twitch.",
+      "result": "29 tests passing. Live check: subscription HTTP 202 enabled; a viewer's !search 2 arrived and opened location 2."
+    },
+    {
+      "n": 6,
+      "asked": "Wait for the host before starting; drop the bot's own EventSub echoes by message id; put the objection prompt in the testimony card; one closing line at the reveal; README steps for a real channel.",
+      "result": "32 tests passing."
+    },
+    {
+      "n": 7,
+      "asked": "A narrated showcase page for the demo video: live Twitch with the real chat embed, a full case with 12 simulated viewers on a second server, and this build log.",
+      "result": "34 tests passing; the tour runs end to end."
+    },
+    {
+      "n": 8,
+      "asked": "Keep the live Twitch search ballot open for a real vote, make the showcase stay through the simulated reveal within the tour time cap, and use the build-log pass count dynamically.",
+      "result": "Live ballot timer can be paused and resumed; the showcase waits for the sim reveal and holds it for six seconds."
+    },
+    {
+      "n": 9,
+      "asked": "Timing: slow the simulated case so the caught lie and the reveal can be read, give the build log about 25 seconds, show CASE CLOSED at the reveal.",
+      "result": "35 tests passing; tour about 2:30."
+    },
+    {
+      "n": 10,
+      "asked": "Make the simulated chat readable on screen and skip narration beats that are already stale.",
+      "result": "35 tests passing."
+    },
+    {
+      "n": 11,
+      "asked": "Typing in the embedded Twitch chat does not work, even with third-party cookies allowed. Open the real popout chat in its own window from the Start click and show the lines EventSub actually received.",
+      "result": "35 tests passing; no embed left."
+    },
+    {
+      "n": 12,
+      "asked": "From the first recorded take: keep the newest simulated chat lines in view, clear the old run's lines, close the popup and preload the next step before switching.",
+      "result": "35 tests passing."
+    },
+    {
+      "n": 13,
+      "asked": "Regression: the preloaded simulated overlay stayed black. Recompute the stage scale on resize and preload off-screen at full size.",
+      "result": "35 tests passing; the second take was recorded with this build."
+    }
+  ]
+}
