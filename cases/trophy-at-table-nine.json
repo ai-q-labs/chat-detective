@@ -1,0 +1,27 @@
+{
+  "title": "The Trophy at Table Nine",
+  "intro": "A board-game café's Friday tournament. At 21:40 the lights went out for ninety seconds. When they came back, the champion's trophy was gone from the shelf behind the counter. Four people were close enough to reach it.",
+  "suspects": {
+    "A": { "name": "Mara Quill", "role": "Café owner", "detail": "Insured the trophy last month." },
+    "B": { "name": "Theo Brandt", "role": "Last year's champion", "detail": "Lost in the semi-final tonight." },
+    "C": { "name": "Ivy Sato", "role": "Tournament judge", "detail": "Was holding the fuse-box key." },
+    "D": { "name": "Ruben Ash", "role": "Delivery rider", "detail": "Arrived at 21:35 with pizzas and is still here." }
+  },
+  "locations": [
+    { "id": 1, "name": "Fuse box (back hallway)", "evidence": { "id": "E1", "text": "The main switch was flipped by hand, not blown. A smear of red ink from a pizza box is on the lever." } },
+    { "id": 2, "name": "Counter shelf", "evidence": { "id": "E2", "text": "A dust outline where the trophy stood, and a cardboard pizza-box insert left in its place, cut to the trophy's height so it looked like the trophy in the dark." } },
+    { "id": 3, "name": "Delivery bag", "evidence": { "id": "E3", "text": "Empty except for the receipt: four pizzas, delivered 21:35, signed ‘I. Sato’." } }
+  ],
+  "testimonies": {
+    "A": { "text": "I was at the till the whole blackout. The drawer beeps if it opens, and nobody heard it.", "truth": "Mara's account checks out; the till log confirms nobody opened the drawer.", "truthful": true },
+    "B": { "text": "I'd already gone outside to cool off. I came back in when the lights came on.", "truth": "Theo was outside during the blackout, cooling off after the semi-final.", "truthful": true },
+    "C": { "text": "I never touched the pizzas. I was at Table Nine with the finalists.", "contradictedBy": "E3", "truth": "Fine. I signed for the pizzas at the counter at 21:35, right next to the shelf." },
+    "D": { "text": "I never went past the counter. I left the boxes on the first table and waited by the door.", "contradictedBy": "E1", "truth": "Okay, I flipped the switch. Ivy gave me ten bucks and the key and said it was a prank for the finalists." }
+  },
+  "solution": { "suspect": "C", "text": "Ivy Sato held the fuse-box key and gave it to Ruben to flip the switch. She signed for the pizzas to get beside the shelf, then left the cut cardboard as a stand-in. The trophy was already listed for sale online under a fake name." },
+  "endings": {
+    "C": "Case closed. Chat, you'd make a fine detective.",
+    "D": "Ruben flipped the switch, but he never touched the trophy. The judge walks out with it.",
+    "default": "That suspect's account is cleared. The evidence points to Ivy Sato: she arranged the blackout, took the trophy, and left a cardboard stand-in. It was already listed for sale online under a fake name."
+  }
+}

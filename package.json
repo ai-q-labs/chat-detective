@@ -1,0 +1,14 @@
+{
+  "name": "chat-detective",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A live Twitch chat mystery game",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "start": "node src/server.js",
+    "sim": "node src/server.js --sim",
+    "demo": "node scripts/demo.js",
+    "check-twitch": "node scripts/check-twitch.js",
+    "test": "node --test"
+  }
+}
